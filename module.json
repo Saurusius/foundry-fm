@@ -1,0 +1,32 @@
+{
+  "id": "foundry-fm",
+  "title": "Foundry FM",
+  "description": "Lecteur YouTube intégré à Foundry VTT pour diffuser de la musique synchronisée aux joueurs. Contrôles MJ, lecteur joueur simplifié, playlists par profil, boucle, volume et couleur par utilisateur, et lanceur flottant déplaçable.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Saurusius"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/foundry-fm.css"
+  ],
+  "languages": [
+    {
+      "lang": "fr",
+      "name": "Français",
+      "path": "lang/fr.json"
+    }
+  ],
+  "socket": true,
+  "url": "https://github.com/Saurusius/foundry-fm",
+  "manifest": "https://github.com/Saurusius/foundry-fm/releases/latest/download/module.json",
+  "download": "https://github.com/Saurusius/foundry-fm/releases/download/v1.0.0/foundry-fm-v1.0.0.zip"
+}
