@@ -1,90 +1,203 @@
 # 📻 Foundry FM
 
-**Foundry FM** est un lecteur YouTube intégré à **Foundry Virtual Tabletop V14** pensé pour diffuser facilement de la musique à une table de jeu.
+**Foundry FM** est un lecteur YouTube intégré à **Foundry Virtual Tabletop V14**, conçu pour diffuser facilement de la musique synchronisée à toute une table de jeu.
 
-Le MJ pilote la diffusion globale tandis que chaque joueur dispose d'un lecteur simplifié avec ses propres préférences de volume, de couleur, de position et d'affichage.
+Le **MJ contrôle la diffusion globale**, tandis que chaque joueur dispose d’un lecteur simplifié avec ses propres préférences de volume, de couleur, de position et d’affichage.
 
-## Fonctionnalités
+## ✨ Fonctionnalités
 
-- Lecture YouTube intégrée à Foundry VTT.
-- Synchronisation MJ → joueurs.
-- Lecture, pause, arrêt, précédent, suivant et déplacement temporel.
-- Lecture en boucle.
-- File d'attente persistante.
-- Playlists séparées par profil MJ.
-- Édition des playlists :
-  - renommage ;
-  - ajout et retrait de morceaux ;
-  - réorganisation ;
-  - ajout ou remplacement depuis la file actuelle.
-- Confirmations de sécurité avant les modifications importantes.
-- Recherche YouTube optionnelle avec une clé YouTube Data API v3.
-- Volume individuel enregistré par profil.
-- Couleur de fond individuelle enregistrée par profil.
-- Lecteur déplaçable et minimisable pour les MJ et les joueurs.
-- Interface joueur volontairement simplifiée.
-- Lanceur flottant déplaçable avec petite radio et notes animées pendant la lecture.
-- La fenêtre peut être totalement masquée sans interrompre la musique.
-- Position et état d'affichage mémorisés par profil.
+* Lecture YouTube directement dans Foundry VTT.
+* Synchronisation de la lecture **MJ → joueurs**.
+* Lecture, pause, arrêt, précédent et suivant.
+* Avance et retour de 10 secondes.
+* Lecture d’un morceau en boucle.
+* File d’attente persistante.
+* Playlists séparées pour chaque profil MJ.
+* Recherche YouTube intégrée optionnelle.
+* Volume individuel enregistré par profil.
+* Couleur du lecteur personnalisable par profil.
+* Lecteur déplaçable et minimisable.
+* Lanceur flottant déplaçable.
+* Notes de musique animées pendant la lecture.
+* Masquage complet du lecteur sans interrompre l’audio.
+* Position et état d’affichage mémorisés par profil.
 
-## Compatibilité
+## 🎵 Playlists
 
-- **Foundry VTT : 14+**
-- Vérifié avec Foundry VTT 14.
+Chaque MJ dispose de ses propres playlists.
 
-## Installation par manifest
+Il est possible de :
+
+* créer une playlist depuis la file d’attente ;
+* renommer une playlist ;
+* ajouter une vidéo YouTube directement à une playlist ;
+* retirer des morceaux ;
+* ajouter la file actuelle à une playlist ;
+* remplacer le contenu d’une playlist par la file actuelle ;
+* charger une playlist dans la file d’attente ;
+* ajouter une playlist à la suite de la file actuelle ;
+* réorganiser manuellement les morceaux.
+
+### 🖱️ Drag & Drop — v1.1.0
+
+Depuis la version **1.1.0**, les morceaux d’une playlist peuvent être réorganisés directement par **glisser-déposer**.
+
+Dans l’éditeur d’une playlist :
+
+1. Attrapez la poignée `⋮⋮` située à gauche d’un morceau.
+2. Faites glisser le morceau vers sa nouvelle position.
+3. Une ligne indique où il sera placé.
+4. Relâchez le morceau.
+
+Le nouvel ordre est automatiquement sauvegardé dans la playlist du profil MJ.
+
+Les boutons **Monter** et **Descendre** restent disponibles comme alternative au drag & drop.
+
+## 👑 Contrôles MJ
+
+Le MJ dispose de l’interface complète :
+
+* lecture et pause ;
+* arrêt ;
+* morceau précédent / suivant ;
+* déplacement de ±10 secondes ;
+* boucle ;
+* gestion de la file d’attente ;
+* gestion complète des playlists ;
+* recherche YouTube ;
+* ajout d’URL YouTube ;
+* gestion de la diffusion synchronisée.
+
+## 👥 Interface joueur
+
+Les joueurs disposent volontairement d’une interface simplifiée.
+
+Ils peuvent :
+
+* voir la musique actuellement diffusée ;
+* régler leur propre volume ;
+* personnaliser la couleur du lecteur ;
+* déplacer le lecteur ;
+* minimiser la fenêtre ;
+* masquer ou afficher complètement Foundry FM.
+
+Le MJ reste le seul à contrôler la diffusion globale.
+
+## 🎨 Personnalisation
+
+Les préférences suivantes sont enregistrées individuellement pour chaque profil :
+
+* volume ;
+* couleur du lecteur ;
+* position de la fenêtre ;
+* position du lanceur flottant ;
+* état minimisé ;
+* affichage ou masquage du lecteur.
+
+Les préférences d’un joueur n’affectent donc pas celles des autres utilisateurs.
+
+## 🔎 Recherche YouTube
+
+La lecture d’une URL YouTube fonctionne **sans clé API**.
+
+Pour utiliser la recherche YouTube directement depuis Foundry FM, une clé **YouTube Data API v3** est nécessaire.
+
+Elle peut être renseignée dans les paramètres du module.
+
+Il est recommandé de restreindre cette clé à votre domaine Foundry depuis Google Cloud.
+
+## 📦 Installation
+
+### Installation par manifest
 
 Dans Foundry VTT :
 
 1. Ouvrez **Configuration et installation**.
 2. Allez dans **Modules complémentaires**.
 3. Cliquez sur **Installer un module**.
-4. Collez le manifest suivant :
+4. Collez l’URL suivante :
 
 ```text
 https://raw.githubusercontent.com/Saurusius/foundry-fm/main/module.json
 ```
 
-## Installation manuelle
+Foundry téléchargera automatiquement la dernière version disponible.
 
-Téléchargez le ZIP de la dernière Release GitHub et extrayez le dossier `foundry-fm` dans :
+### Installation manuelle
+
+Téléchargez le ZIP de la dernière Release GitHub :
 
 ```text
-FoundryVTT/Data/modules/
+foundry-fm-v1.1.0.zip
 ```
 
-Puis relancez Foundry et activez **Foundry FM** dans votre monde.
+Extrayez son contenu dans :
 
-## Recherche YouTube
+```text
+FoundryVTT/Data/modules/foundry-fm/
+```
 
-La lecture d'une URL YouTube fonctionne sans clé API.
+Puis relancez Foundry VTT et activez **Foundry FM** dans votre monde.
 
-Pour utiliser la recherche intégrée, renseignez une **clé YouTube Data API v3** dans les paramètres du module. Il est recommandé de restreindre cette clé à votre domaine Foundry.
+## 🔄 Mises à jour
 
-## Contrôles
+Foundry FM utilise les Releases GitHub pour les mises à jour.
 
-### MJ
+Le manifest stable est disponible via :
 
-Le MJ dispose de l'interface complète : commandes de lecture, file d'attente, playlists, recherche et gestion de la diffusion.
+```text
+https://github.com/Saurusius/foundry-fm/releases/latest/download/module.json
+```
 
-### Joueurs
+Lorsqu’une nouvelle version est publiée, Foundry peut automatiquement détecter et installer la mise à jour.
 
-Les joueurs voient uniquement la musique en cours et disposent de leurs préférences locales :
+## 🧩 Compatibilité
 
-- volume ;
-- couleur ;
-- déplacement ;
-- minimisation ;
-- affichage/masquage.
+* **Foundry Virtual Tabletop : V14+**
+* Version vérifiée : **Foundry VTT 14**
+* Version actuelle de Foundry FM : **1.1.0**
 
-## Remarque sur l'autoplay
+## 🔊 Autoplay
 
-Selon les règles du navigateur, un joueur peut devoir cliquer une première fois sur **Activer le son** avant que l'audio puisse démarrer automatiquement.
+Les navigateurs modernes peuvent bloquer la lecture automatique d’audio.
 
-## Licence
+Lors de sa première connexion, un joueur peut donc devoir cliquer une fois sur :
 
-MIT — voir [LICENSE](LICENSE).
+**Activer le son**
+
+Après cette première interaction, Foundry FM pourra normalement suivre la diffusion synchronisée du MJ.
+
+## 📜 Changelog
+
+### 1.1.0 — Drag & Drop
+
+* Réorganisation des morceaux par glisser-déposer.
+* Nouvelle poignée de déplacement sur les morceaux.
+* Indicateur visuel de position pendant le déplacement.
+* Sauvegarde automatique du nouvel ordre.
+* Conservation des boutons Monter / Descendre.
+* Aucun changement du fonctionnement de la synchronisation YouTube.
+
+### 1.0.0 — Première version publique
+
+* Lecteur YouTube intégré.
+* Synchronisation MJ → joueurs.
+* File d’attente.
+* Playlists par profil.
+* Recherche YouTube.
+* Personnalisation par utilisateur.
+* Lanceur flottant.
+* Minimisation et masquage.
+* Lecture en boucle.
+
+Le changelog complet est disponible dans [`CHANGELOG.md`](CHANGELOG.md).
+
+## 📄 Licence
+
+Foundry FM est distribué sous licence **MIT**.
+
+Voir [`LICENSE`](LICENSE).
 
 ---
 
-Développé pour Foundry VTT par **Saurusius**.
+Développé pour **Foundry Virtual Tabletop** par **Saurusius**. 🎵
