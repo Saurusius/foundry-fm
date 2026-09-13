@@ -2,6 +2,17 @@
 
 Toutes les évolutions importantes de Foundry FM sont documentées ici.
 
+## [1.2.0] - 2026-09-13
+
+### File d’attente piste par piste
+
+- Ajout d’un bouton permettant d’ajouter une piste individuelle d’une playlist à la fin de la file.
+- Ajout d’une action « Lire ensuite » pour insérer une piste juste après le morceau en cours.
+- Ajout d’un accès plus visible à la liste des pistes depuis chaque playlist.
+- Les pistes ajoutées à la file reçoivent un identifiant propre afin de pouvoir ajouter plusieurs fois le même morceau sans conflit.
+- Conservation du glisser-déposer et des outils d’édition existants des playlists.
+- Aucun changement du moteur YouTube ni de la synchronisation MJ → joueurs.
+
 ## [1.1.0] - 2026-08-28
 
 ### Réorganisation des playlists
