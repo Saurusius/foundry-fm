@@ -1,0 +1,119 @@
+name: Promote dev to master
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-dev-to-master
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate module
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Validate module.json
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const m = JSON.parse(fs.readFileSync("module.json", "utf8"));
+          if (!m.id || !m.version) throw new Error("module.json invalide");
+          if (m.id !== "foundry-fm") throw new Error("ID module inattendu");
+
+          const files = [
+            ...(m.esmodules ?? []),
+            ...(m.scripts ?? []),
+            ...(m.styles ?? []),
+            ...((m.languages ?? []).map((l) => l.path).filter(Boolean))
+          ];
+
+          for (const file of files) {
+            if (!fs.existsSync(file)) throw new Error(`Fichier déclaré introuvable: ${file}`);
+          }
+
+          console.log(m.id + " v" + m.version);
+          NODE
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find scripts -type f \( -name '*.js' -o -name '*.mjs' \) -print0)
+
+      - name: Validate JSON files
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+
+          function walk(dir) {
+            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) return walk(full);
+              return entry.isFile() && entry.name.endsWith(".json") ? [full] : [];
+            });
+          }
+
+          const files = ["module.json", ...["lang", "data", "assets"]
+            .filter((dir) => fs.existsSync(dir))
+            .flatMap(walk)];
+
+          for (const file of files) JSON.parse(fs.readFileSync(file, "utf8"));
+          console.log(files.length + " fichiers JSON validés.");
+          NODE
+
+      - name: Validate release URLs
+        shell: bash
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('module.json','utf8')).version")
+          EXPECTED_DOWNLOAD="https://github.com/${{ github.repository }}/releases/download/v${VERSION}/foundry-fm-v${VERSION}.zip"
+          EXPECTED_MANIFEST="https://github.com/${{ github.repository }}/releases/latest/download/module.json"
+          ACTUAL_DOWNLOAD=$(node -p "JSON.parse(require('fs').readFileSync('module.json','utf8')).download || ''")
+          ACTUAL_MANIFEST=$(node -p "JSON.parse(require('fs').readFileSync('module.json','utf8')).manifest || ''")
+
+          test "$ACTUAL_DOWNLOAD" = "$EXPECTED_DOWNLOAD" || {
+            echo "::error::URL download incorrect";
+            echo "Attendu: $EXPECTED_DOWNLOAD";
+            echo "Actuel: $ACTUAL_DOWNLOAD";
+            exit 1;
+          }
+
+          test "$ACTUAL_MANIFEST" = "$EXPECTED_MANIFEST" || {
+            echo "::error::URL manifest incorrect";
+            echo "Attendu: $EXPECTED_MANIFEST";
+            echo "Actuel: $ACTUAL_MANIFEST";
+            exit 1;
+          }
+
+  promote:
+    name: Fast-forward dev to master
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Promote only if master is an ancestor of dev
+        shell: bash
+        run: |
+          git fetch origin dev master
+          git merge-base --is-ancestor origin/master origin/dev || {
+            echo "::error::master a divergé de dev. Fusion automatique refusée.";
+            exit 1;
+          }
+          git push origin origin/dev:refs/heads/master
