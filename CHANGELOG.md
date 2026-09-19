@@ -2,6 +2,17 @@
 
 Toutes les évolutions importantes de Foundry FM sont documentées ici.
 
+## [1.2.1] - 2026-09-19
+
+### Correctif — pistes unitaires depuis les playlists
+
+- Corrige l’intégration de la fonctionnalité annoncée en 1.2.0 : le code enrichi avait été placé dans `dragdrop.mjs` à la racine alors que Foundry charge `scripts/dragdrop.mjs`.
+- Ajoute dans l’interface active un accès direct à la liste des pistes de chaque playlist.
+- Ajoute un bouton pour envoyer une piste individuelle à la fin de la file d’attente.
+- Ajoute l’action « Lire ensuite » pour insérer une piste juste après le morceau en cours.
+- Chaque insertion crée un identifiant de file propre, ce qui permet d’ajouter plusieurs fois le même morceau sans conflit.
+- Aucun changement du moteur YouTube ni de la synchronisation MJ → joueurs.
+
 ## [1.2.0] - 2026-09-13
 
 ### File d’attente piste par piste
