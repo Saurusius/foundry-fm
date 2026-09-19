@@ -186,6 +186,12 @@ async function setQueue(queue) {
   await notifyClients();
 }
 
+function cloneItemForQueue(item) {
+  const clone = foundry.utils.deepClone(item ?? {});
+  clone.id = crypto.randomUUID?.() ?? foundry.utils.randomID();
+  return clone;
+}
+
 function extractVideoId(input = "") {
   const value = input.trim();
   if (!value) return "";
@@ -613,7 +619,7 @@ async function loadPlaylist(playlistId, { append = false, autoplay = true } = {}
   if (!playlist) return;
 
   const existing = getQueue();
-  const items = foundry.utils.deepClone(playlist.items ?? []);
+  const items = (playlist.items ?? []).map(cloneItemForQueue);
 
   const queue = append
     ? { ...existing, items: [...existing.items, ...items] }

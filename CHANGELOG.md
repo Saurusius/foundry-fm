@@ -16,6 +16,7 @@ Toutes les évolutions importantes de Foundry FM sont documentées ici.
 - Corrige le volume initial d’un profil neuf : le réglage par défaut n’est plus interprété comme 0 %.
 - Les seeks effectués directement dans la barre de progression YouTube du MJ sont désormais propagés au lieu d’être annulés par la resynchronisation.
 - Nettoie les anciennes copies de fichiers à la racine qui n’étaient pas chargées par Foundry.
+- Régénère un identifiant de file à chaque chargement d’une piste depuis une playlist, y compris lorsqu’une playlist complète est ajoutée plusieurs fois.
 - Ajoute un contrôle CI empêchant le retour de ces copies « fantômes ».
 - Aucun changement du moteur YouTube ni du principe de synchronisation MJ → joueurs.
 
