@@ -11,7 +11,13 @@ Toutes les évolutions importantes de Foundry FM sont documentées ici.
 - Ajoute un bouton pour envoyer une piste individuelle à la fin de la file d’attente.
 - Ajoute l’action « Lire ensuite » pour insérer une piste juste après le morceau en cours.
 - Chaque insertion crée un identifiant de file propre, ce qui permet d’ajouter plusieurs fois le même morceau sans conflit.
-- Aucun changement du moteur YouTube ni de la synchronisation MJ → joueurs.
+- Corrige l’index de file lors des ajouts sans lecture immédiate afin que « Suivant » ne saute plus la première piste.
+- Corrige la navigation après retrait du morceau courant.
+- Corrige le volume initial d’un profil neuf : le réglage par défaut n’est plus interprété comme 0 %.
+- Les seeks effectués directement dans la barre de progression YouTube du MJ sont désormais propagés au lieu d’être annulés par la resynchronisation.
+- Nettoie les anciennes copies de fichiers à la racine qui n’étaient pas chargées par Foundry.
+- Ajoute un contrôle CI empêchant le retour de ces copies « fantômes ».
+- Aucun changement du moteur YouTube ni du principe de synchronisation MJ → joueurs.
 
 ## [1.2.0] - 2026-09-13
 

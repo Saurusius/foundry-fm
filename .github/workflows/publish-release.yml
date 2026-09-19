@@ -33,6 +33,33 @@ jobs:
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
           echo "zip=foundry-fm-v$VERSION.zip" >> "$GITHUB_OUTPUT"
 
+      - name: Validate declared module files
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const m = JSON.parse(fs.readFileSync("module.json", "utf8"));
+
+          const files = [
+            ...(m.esmodules ?? []),
+            ...(m.scripts ?? []),
+            ...(m.styles ?? []),
+            ...((m.languages ?? []).map((l) => l.path).filter(Boolean))
+          ];
+
+          for (const file of files) {
+            if (!fs.existsSync(file)) throw new Error(`Fichier déclaré introuvable: ${file}`);
+
+            if (file.includes("/")) {
+              const shadow = path.basename(file);
+              if (fs.existsSync(shadow)) {
+                throw new Error(`Copie fantôme interdite à la racine: ${shadow} (source active: ${file})`);
+              }
+            }
+          }
+          NODE
+
       - name: Validate release metadata
         shell: bash
         run: |

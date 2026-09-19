@@ -6,9 +6,9 @@ Le **Game Master contrôle la diffusion globale**, tandis que chaque joueur disp
 
 > Toute la musique de la table, sans jongler entre plusieurs applications.
 
-## ✨ Version actuelle — 1.2.0
+## ✨ Version actuelle — 1.2.1
 
-La version **1.2.0** améliore la gestion de la file d'attente et des playlists avec un contrôle piste par piste.
+La version **1.2.1** consolide la gestion de la file d'attente et des playlists avec un contrôle piste par piste.
 
 Elle ajoute notamment :
 
@@ -236,10 +236,19 @@ Le développement quotidien doit donc rester sur **`dev`**. La branche **`master
 - **Foundry Virtual Tabletop : V14+**
 - Version minimum : **Foundry VTT 14**
 - Version vérifiée : **Foundry VTT 14**
-- Version actuelle de Foundry FM : **1.2.0**
+- Version actuelle de Foundry FM : **1.2.1**
 - Interface : **Français**
 
 ## 📜 Changelog
+
+### 1.2.1 — Correctifs de fiabilité
+
+- Activation effective des actions piste par piste dans le fichier réellement chargé par Foundry.
+- Correction de l’index de file lors des ajouts sans lecture immédiate.
+- Correction du retrait du morceau courant et de la navigation Précédent/Suivant.
+- Respect du volume par défaut sur un profil neuf.
+- Synchronisation des seeks effectués directement dans le lecteur YouTube du MJ.
+- Nettoyage des anciennes copies de fichiers à la racine du dépôt.
 
 ### 1.2.0 — File d'attente piste par piste
 

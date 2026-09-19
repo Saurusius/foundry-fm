@@ -9,7 +9,8 @@ const DEFAULT_STATE = {
   currentTime: 0,
   updatedAt: 0,
   revision: 0,
-  loop: false
+  loop: false,
+  queueItemId: ""
 };
 
 const DEFAULT_QUEUE = {
@@ -23,7 +24,6 @@ let ytPlayer = null;
 let ytReadyPromise = null;
 let widget = null;
 let launcher = null;
-let controlsObserver = null;
 let applyingRemoteState = false;
 let lastAppliedRevision = -1;
 let openPlaylistEditorId = null;
@@ -293,8 +293,11 @@ async function handlePlayerStateChange(event) {
 
   const currentTime = safeCurrentTime();
 
-  if (event.data === YT.PlayerState.PLAYING && state.status !== "playing") {
-    await setState({ status: "playing", currentTime });
+  if (event.data === YT.PlayerState.PLAYING) {
+    const drift = Math.abs(currentTime - expectedTime(state));
+    if (state.status !== "playing" || drift > 1.75) {
+      await setState({ status: "playing", currentTime });
+    }
   } else if (event.data === YT.PlayerState.PAUSED && state.status !== "paused") {
     await setState({ status: "paused", currentTime });
   } else if (event.data === YT.PlayerState.ENDED) {
@@ -376,21 +379,34 @@ async function applyPersistedState({ force = false } = {}) {
   }
 }
 
-function correctPlaybackDrift() {
+async function correctPlaybackDrift() {
   const state = getState();
-  if (!ytPlayer || state.status !== "playing" || !state.videoId) return;
+  if (!ytPlayer || !state.videoId) return;
 
   try {
     const currentId = ytPlayer.getVideoData?.()?.video_id ?? "";
     if (currentId !== state.videoId) return;
 
+    const currentTime = safeCurrentTime();
     const target = expectedTime(state);
-    const delta = target - safeCurrentTime();
-    if (Math.abs(delta) > 2.25) {
-      applyingRemoteState = true;
-      ytPlayer.seekTo(target, true);
-      window.setTimeout(() => { applyingRemoteState = false; }, 250);
+    const delta = target - currentTime;
+
+    // Le MJ est la source d'autorité : un seek manuel dans le lecteur YouTube
+    // doit être propagé, pas annulé par le correcteur de dérive.
+    if (game.user.isGM) {
+      if (!applyingRemoteState
+        && (state.status === "playing" || state.status === "paused")
+        && Math.abs(delta) > 2.25) {
+        await setState({ currentTime, status: state.status });
+      }
+      return;
     }
+
+    if (state.status !== "playing" || Math.abs(delta) <= 2.25) return;
+
+    applyingRemoteState = true;
+    ytPlayer.seekTo(target, true);
+    window.setTimeout(() => { applyingRemoteState = false; }, 250);
   } catch (_) {}
 }
 
@@ -418,7 +434,6 @@ async function playFromInput({ addOnly = false } = {}) {
   if (addOnly) {
     const queue = getQueue();
     queue.items.push(item);
-    if (queue.index < 0) queue.index = 0;
     await setQueue(queue);
     ui.notifications.info(`Foundry FM : « ${item.title} » ajouté à la file.`);
     input.value = "";
@@ -435,12 +450,14 @@ async function playFromInput({ addOnly = false } = {}) {
   }
 
   await setQueue(queue);
+  const queuedItem = queue.items[queue.index] ?? item;
   await setState({
     videoId,
     url: item.url,
     title: item.title,
     status: "playing",
-    currentTime: 0
+    currentTime: 0,
+    queueItemId: queuedItem.id ?? ""
   });
 
   input.value = "";
@@ -497,7 +514,8 @@ async function playQueueIndex(index) {
     url: item.url,
     title: item.title,
     status: "playing",
-    currentTime: 0
+    currentTime: 0,
+    queueItemId: item.id ?? ""
   });
 }
 
@@ -515,7 +533,18 @@ async function playPrevious() {
   if (!game.user.isGM) return;
   const queue = getQueue();
   if (!queue.items.length) return;
-  await playQueueIndex(Math.max(0, queue.index - 1));
+
+  const state = getState();
+  const selected = queue.items[queue.index];
+  const selectedIsCurrent = Boolean(selected) && (
+    state.queueItemId
+      ? selected.id === state.queueItemId
+      : selected.videoId === state.videoId
+  );
+
+  const previous = selectedIsCurrent ? queue.index - 1 : queue.index;
+  if (previous < 0) return;
+  await playQueueIndex(previous);
 }
 
 async function removeQueueItem(index) {
@@ -527,7 +556,7 @@ async function removeQueueItem(index) {
 
   if (!queue.items.length) queue.index = -1;
   else if (index < queue.index) queue.index -= 1;
-  else if (index === queue.index) queue.index = Math.min(queue.index, queue.items.length - 1);
+  else if (index === queue.index) queue.index = index - 1;
 
   await setQueue(queue);
 }
@@ -588,9 +617,8 @@ async function loadPlaylist(playlistId, { append = false, autoplay = true } = {}
 
   const queue = append
     ? { ...existing, items: [...existing.items, ...items] }
-    : { items, index: items.length ? 0 : -1 };
+    : { items, index: autoplay && items.length ? 0 : -1 };
 
-  if (append && queue.index < 0 && queue.items.length) queue.index = 0;
   await setQueue(queue);
 
   if (!append && autoplay && items.length) {
@@ -864,14 +892,21 @@ function getProfileVolume() {
   const flagged = Number(game.user?.getFlag?.(MODULE_ID, "volume"));
   if (Number.isFinite(flagged)) return Math.max(0, Math.min(100, flagged));
 
-  const profileLocal = Number(localStorage.getItem(getProfileStorageKey("volume")));
-  if (Number.isFinite(profileLocal)) return Math.max(0, Math.min(100, profileLocal));
+  const profileRaw = localStorage.getItem(getProfileStorageKey("volume"));
+  if (profileRaw !== null) {
+    const profileLocal = Number(profileRaw);
+    if (Number.isFinite(profileLocal)) return Math.max(0, Math.min(100, profileLocal));
+  }
 
   // Migration douce depuis la préférence locale des versions précédentes.
-  const legacy = Number(localStorage.getItem(`${MODULE_ID}.volume`));
-  if (Number.isFinite(legacy)) return Math.max(0, Math.min(100, legacy));
+  const legacyRaw = localStorage.getItem(`${MODULE_ID}.volume`);
+  if (legacyRaw !== null) {
+    const legacy = Number(legacyRaw);
+    if (Number.isFinite(legacy)) return Math.max(0, Math.min(100, legacy));
+  }
 
-  return Number(game.settings.get(MODULE_ID, "defaultVolume") ?? 35);
+  const configured = Number(game.settings.get(MODULE_ID, "defaultVolume") ?? 35);
+  return Number.isFinite(configured) ? Math.max(0, Math.min(100, configured)) : 35;
 }
 
 function saveProfileVolume(value) {
@@ -1302,14 +1337,14 @@ function refreshWidget() {
   }
 
   if (game.user.isGM) {
-    renderQueue(queue);
+    renderQueue(queue, state);
     renderPlaylists();
   }
 
   updateLauncherState();
 }
 
-function renderQueue(queue) {
+function renderQueue(queue, state = getState()) {
   const container = widget?.querySelector("[data-ft-queue]");
   if (!container) return;
   container.innerHTML = "";
@@ -1319,9 +1354,16 @@ function renderQueue(queue) {
     return;
   }
 
+  const selected = queue.items[queue.index];
+  const selectedIsCurrent = Boolean(selected) && (
+    state.queueItemId
+      ? selected.id === state.queueItemId
+      : selected.videoId === state.videoId
+  );
+
   queue.items.forEach((item, index) => {
     const row = document.createElement("div");
-    row.className = `ft-queue-item${index === queue.index ? " active" : ""}`;
+    row.className = `ft-queue-item${selectedIsCurrent && index === queue.index ? " active" : ""}`;
 
     row.innerHTML = `
       <button type="button" class="ft-queue-play" title="Lire">

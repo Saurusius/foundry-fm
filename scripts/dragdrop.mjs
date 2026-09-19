@@ -184,10 +184,8 @@ async function addPlaylistTrackToQueue(playlistId, trackIndex, { playNext = fals
       ? Math.min(queue.index + 1, queue.items.length)
       : 0;
     queue.items.splice(insertIndex, 0, item);
-    if (queue.index < 0) queue.index = 0;
   } else {
     queue.items.push(item);
-    if (queue.index < 0) queue.index = 0;
   }
 
   await saveQueue(queue, playNext ? "playlist-track-next" : "playlist-track-add");
