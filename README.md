@@ -138,7 +138,7 @@ Après cette première interaction, Foundry FM peut normalement suivre automatiq
 
 ## 📦 Installation
 
-### Installation par manifeste
+### Méthode recommandée — installation par manifeste
 
 Dans Foundry VTT :
 
@@ -155,13 +155,13 @@ Foundry utilisera automatiquement le ZIP correspondant à la version publiée.
 
 ### Installation manuelle
 
-Téléchargez le ZIP de la dernière **Release GitHub** :
+La dernière release est toujours disponible ici :
 
 ```text
-foundry-fm-vX.Y.Z.zip
+https://github.com/Saurusius/foundry-fm/releases/latest
 ```
 
-Puis extrayez son contenu dans :
+Téléchargez le fichier `foundry-fm-vX.Y.Z.zip`, puis extrayez son contenu dans :
 
 ```text
 FoundryVTT/Data/modules/foundry-fm/
