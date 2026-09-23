@@ -35,7 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
 
       - name: Validate module.json and declared files
@@ -54,9 +54,9 @@ jobs:
             ...((m.languages ?? []).map((l) => l.path).filter(Boolean))
           ];
           for (const file of files) {
-            if (!fs.existsSync(file)) throw new Error(\`Fichier déclaré introuvable: \${file}\`);
+            if (!fs.existsSync(file)) throw new Error(`Fichier déclaré introuvable: ${file}`);
             if (file.includes("/") && fs.existsSync(path.basename(file))) {
-              throw new Error(\`Copie fantôme interdite à la racine: \${path.basename(file)}\`);
+              throw new Error(`Copie fantôme interdite à la racine: ${path.basename(file)}`);
             }
           }
           NODE
@@ -99,7 +99,7 @@ jobs:
         id: version
         shell: bash
         env:
-          BUMP: \${{ inputs.bump }}
+          BUMP: ${{ inputs.bump }}
         run: |
           set -euo pipefail
           node <<'NODE'
@@ -125,29 +125,29 @@ jobs:
           const repoName = repo.split("/")[1];
 
           m.version = nextVersion;
-          m.download = \`https://github.com/\${repo}/releases/download/v\${nextVersion}/\${repoName}-v\${nextVersion}.zip\`;
+          m.download = `https://github.com/${repo}/releases/download/v${nextVersion}/${repoName}-v${nextVersion}.zip`;
 
           if (typeof m.changelog === "string" && m.changelog.includes("/releases/tag/")) {
-            m.changelog = \`https://github.com/\${repo}/releases/tag/v\${nextVersion}\`;
+            m.changelog = `https://github.com/${repo}/releases/tag/v${nextVersion}`;
           }
 
-          if (typeof m.description === "string" && m.description.includes(\`v\${oldVersion}\`)) {
-            m.description = m.description.replace(\`v\${oldVersion}\`, \`v\${nextVersion}\`);
+          if (typeof m.description === "string" && m.description.includes(`v${oldVersion}`)) {
+            m.description = m.description.replace(`v${oldVersion}`, `v${nextVersion}`);
           }
 
           fs.writeFileSync(file, JSON.stringify(m, null, 2) + "\n");
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, \`old=\${oldVersion}\nversion=\${nextVersion}\n\`);
-          console.log(\`Version: v\${oldVersion} -> v\${nextVersion}\`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `old=${oldVersion}\nversion=${nextVersion}\n`);
+          console.log(`Version: v${oldVersion} -> v${nextVersion}`);
           NODE
 
       - name: Validate generated release metadata
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="\${{ steps.version.outputs.version }}"
-          REPO_NAME="\${GITHUB_REPOSITORY#*/}"
-          EXPECTED_DOWNLOAD="https://github.com/\${GITHUB_REPOSITORY}/releases/download/v\${VERSION}/\${REPO_NAME}-v\${VERSION}.zip"
-          EXPECTED_MANIFEST="https://github.com/\${GITHUB_REPOSITORY}/releases/latest/download/module.json"
+          VERSION="${{ steps.version.outputs.version }}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          EXPECTED_DOWNLOAD="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/${REPO_NAME}-v${VERSION}.zip"
+          EXPECTED_MANIFEST="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/module.json"
           ACTUAL_DOWNLOAD=$(node -p "JSON.parse(require('fs').readFileSync('module.json','utf8')).download || ''")
           ACTUAL_MANIFEST=$(node -p "JSON.parse(require('fs').readFileSync('module.json','utf8')).manifest || ''")
 
@@ -158,11 +158,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="\${{ steps.version.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add module.json
-          git commit -m "chore(release): bump version to v\${VERSION}"
+          git commit -m "chore(release): bump version to v${VERSION}"
           git push origin HEAD:dev
 
       - name: Promote dev to master
