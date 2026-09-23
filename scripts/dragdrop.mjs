@@ -82,24 +82,11 @@ function enhancePlaylistCardActions(card) {
   const editButton = actions?.querySelector('[data-action="edit"]');
   if (!actions || !editButton) return;
 
+  // The former "browse tracks" button only proxied a click to this edit button.
+  // Keep a single entry point for both viewing and editing playlist tracks.
+  actions.querySelector("[data-ft-browse-tracks]")?.remove();
   editButton.title = "Voir / modifier les pistes";
-
-  if (actions.querySelector("[data-ft-browse-tracks]")) return;
-
-  const browseButton = document.createElement("button");
-  browseButton.type = "button";
-  browseButton.dataset.ftBrowseTracks = "1";
-  browseButton.title = "Voir les pistes et en choisir pour la file";
-  browseButton.setAttribute("aria-label", "Voir les pistes de la playlist");
-  browseButton.innerHTML = '<i class="fas fa-list-ul"></i>';
-
-  browseButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    editButton.click();
-  });
-
-  actions.insertBefore(browseButton, editButton);
+  editButton.setAttribute("aria-label", "Voir / modifier les pistes de la playlist");
 }
 
 function enhanceTrackRow(row, playlistId, trackIndex) {
